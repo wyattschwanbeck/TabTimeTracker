@@ -1,0 +1,29 @@
+{
+
+  "manifest_version": 2,
+  "name": "TrackPageTime",
+  "description": "Displays a sidebar with a stop-watch for how long you've been in a tab",
+  "version": "1.0",
+  "browser_specific_settings": {
+    "gecko": {
+      "strict_min_version": "54.0a1"
+    }
+  },
+
+  "sidebar_action": {
+    "default_icon": "icons/hourglass.png",
+    "default_title" : "TabTimeTracker",
+    "default_panel": "sidebar/panel.html"
+  },
+
+  "permissions": ["storage", "tabs", "scripting"],
+
+  "commands": {
+    "_execute_sidebar_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y"
+      }
+    }
+  }
+
+}
