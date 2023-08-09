@@ -1,0 +1,22 @@
+
+body {
+  background-color: black;
+  font-family: "Lucida Console", "Courier New", monospace;
+  color: white;
+  text-align: center;
+  
+}
+
+h1 {
+  background-color: black;
+  margin: auto;
+  font-family: "Lucida Console", "Courier New", monospace;
+  color: white;
+}
+
+div {
+  background-color: black;
+  font-family: "Lucida Console", "Courier New", monospace;
+  color: white;
+  margin: auto;
+}
