@@ -1,11 +1,16 @@
 
+
+//window.onload = function () {
+
     let priorUrl;
+    //let currentTime= new Date().getTime();
     let currentTab;
     let startTime;
     let elapsedTime=0;
     let elapsedPreviousTime=0;
     let myWindowId;
     let contentToStore = {};
+    //let startTime; // to keep track of the start time
     let stopwatchInterval; // to keep track of the interval
     let elapsedPausedTime;
 
@@ -152,6 +157,11 @@
         browser.tabs.onRemoved.addListener(saveElapsed);
         browser.tabs.onActiveChanged.addListener(saveElapsed);
         
-    
+        
+
+
+//browser.pageAction.onClicked.addListener(saveElapsed);
+
+
 
 
