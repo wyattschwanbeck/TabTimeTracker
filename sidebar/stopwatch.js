@@ -1,16 +1,11 @@
 
-
-//window.onload = function () {
-
     let priorUrl;
-    //let currentTime= new Date().getTime();
     let currentTab;
     let startTime;
     let elapsedTime=0;
     let elapsedPreviousTime=0;
     let myWindowId;
     let contentToStore = {};
-    //let startTime; // to keep track of the start time
     let stopwatchInterval; // to keep track of the interval
     let elapsedPausedTime;
 
@@ -29,23 +24,34 @@
         }).then(tabs => {
             new_url = tabs[0].url;
 
-            if (priorUrl !== new_url) {
+            if (priorUrl !== new_url || currentTab !== new_url) {
                 contentToStore[`ElapsedTime${currentTab}`] = elapsedTime;
+                let priorElapsedTime = elapsedTime;
+                elapsedTime= 0;
                 browser.storage.local.get(`ElapsedTime${new_url}`).then((storedInfo) => {
                     elapsedPreviousTime = storedInfo[Object.keys(storedInfo)[0]];
                     startTime = new Date().getTime() - elapsedPreviousTime;
-                    browser.storage.local.set(contentToStore);
+                     browser.storage.local.set(contentToStore);
                     stopStopwatch();
                     resetStopwatch();
                     startTimer();
+                    let lastPathArray = priorUrl.split('/');
+                    let lastHost = lastPathArray[2];
+                   
                     priorUrl = currentTab;
+                    
                     currentTab = new_url;
                     //Retrieve elapsed time spent on website based on existing keys
                     let pathArray = currentTab.split('/');
+                    
                     let protocol = pathArray[0];
                     let host = pathArray[2];
                     let url = protocol + '//' + host;
                     let total = 0;
+                     // if(lastHost === host) {
+                         // total += priorElapsedTime;
+                      // }
+                    
 
                     browser.storage.local.get().then((storedInfo) => {
                         Object.keys(storedInfo).forEach((key) => {
@@ -81,7 +87,7 @@
         
         if (!stopwatchInterval) {
             startTime = new Date().getTime() - (elapsedPreviousTime + elapsedPausedTime); // get the starting time by subtracting the elapsed paused time from the current time
-            stopwatchInterval = setInterval(updateStopwatch, 10); // update every second
+            stopwatchInterval = setInterval(updateStopwatch, 100); // update every second
         }
         
     }
@@ -91,6 +97,9 @@
         elapsedPausedTime = new Date().getTime() - startTime; // calculate elapsed paused time
         stopwatchInterval = null; // reset the interval variable
     }
+    
+    //On Tab activated, updated current url
+     
 
     function formatElapsed(elapsedTime) {
         let seconds = Math.floor(elapsedTime / 1000) % 60; // calculate seconds
@@ -134,12 +143,15 @@
         return (number < 10 ? "0" : "") + number;
     }
     
-    
-
+        
+        browser.tabs.onActivated.addListener(saveElapsed);
         browser.tabs.onUpdated.addListener(
         saveElapsed // optional object
-    );
-    browser.tabs.onActivated.addListener(saveElapsed);
-
+        );
+        
+        browser.tabs.onRemoved.addListener(saveElapsed);
+        browser.tabs.onActiveChanged.addListener(saveElapsed);
+        
+    
 
 
