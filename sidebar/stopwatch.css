@@ -3,20 +3,28 @@ body {
   background-color: black;
   font-family: "Lucida Console", "Courier New", monospace;
   color: white;
-  text-align: center;
+  /* text-align: center; */
+  margin:0;
+  background-color: black;
+  font-family: "Lucida Console", "Courier New", monospace;
   
 }
 
 h1 {
   background-color: black;
-  margin: auto;
+  text-align: center;
   font-family: "Lucida Console", "Courier New", monospace;
   color: white;
+  /* width: fit-content; */
+  /* height:fit-content; */
 }
 
 div {
   background-color: black;
   font-family: "Lucida Console", "Courier New", monospace;
   color: white;
-  margin: auto;
+  /* margin: 0; */
+    /* width: fit-content; */
+  /* height:fit-content; */
+  text-align: center;
 }

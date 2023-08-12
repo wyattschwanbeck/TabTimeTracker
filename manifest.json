@@ -2,28 +2,28 @@
 
   "manifest_version": 2,
   "name": "TrackPageTime",
-  "description": "Displays a sidebar with a stop-watch for how long you've been in a tab",
-  "version": "1.0",
-  "browser_specific_settings": {
-    "gecko": {
-      "strict_min_version": "54.0a1"
-    }
+  "description": "Displays a sidebar with a stop-watch for how long you've been in a tab. All time tracking is local to the web browser and your information is private!",
+  "version": "2.1",
+  
+   "browser_action": {
+    "default_icon": "icons/hourglass-lite2.png",
+    "theme_icons": [{
+        "light": "icons/hourglass-lite2.png",
+        "dark": "icons/hourglass-lite2.png",
+        "size": 38
+    }],
+    "default_title": "TimeTracker",
+    "default_popup": "sidebar/panel.html"
+    
   },
 
-  "sidebar_action": {
-    "default_icon": "icons/hourglass.png",
-    "default_title" : "TabTimeTracker",
-    "default_panel": "sidebar/panel.html"
-  },
+  "background": {
+      "scripts": ["sidebar/background.js"],
+      "persistent": true
+    },
 
-  "permissions": ["storage", "tabs", "scripting"],
+  "permissions": ["storage", "tabs", "scripting", "idle","activeTab"]
 
-  "commands": {
-    "_execute_sidebar_action": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+Y"
-      }
-    }
-  }
+  
 
 }
