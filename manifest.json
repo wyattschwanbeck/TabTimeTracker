@@ -1,11 +1,11 @@
 {
 
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "TrackPageTime",
-  "description": "Displays a sidebar with a stop-watch for how long you've been in a tab. All time tracking is local to the web browser and your information is private!",
+  "description": "Displays a stop-watch panel for how long you've been in a tab and overall time on a website.",
   "version": "2.1",
   
-   "browser_action": {
+   "action": {
     "default_icon": "icons/hourglass-lite2.png",
     "theme_icons": [{
         "light": "icons/hourglass-lite2.png",
@@ -18,11 +18,10 @@
   },
 
   "background": {
-      "scripts": ["sidebar/background.js"],
-      "persistent": true
+      "service_worker": "sidebar/background.js"
     },
 
-  "permissions": ["storage", "tabs", "scripting", "idle","activeTab"]
+  "permissions": ["storage", "tabs", "scripting", "idle"]
 
   
 

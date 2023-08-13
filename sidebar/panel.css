@@ -1,7 +1,7 @@
 
 
 html, body {
-
+  padding: 10px 0;
   text-align: center;
   margin:0;
   background-color: black;
@@ -35,7 +35,7 @@ div {
   background-color: black;
   font-family: "Lucida Console", "Courier New", monospace;
   color: white;
-  margin: 0;
+  margin: auto;
   text-align: center;
     /* width: fit-content; */
   /* height:fit-content; */

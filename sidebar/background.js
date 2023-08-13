@@ -1,9 +1,10 @@
 
-var priorUrl;
+var priorUrl="//";
 var currentTab;
 var startTime;
+var sendReceive;
 var elapsedTime=0;
-var elapsedPreviousTime=0;
+var elapsedPreviousTime;
 var myWindowId;
 var contentToStore = {};
 var total = 0;
@@ -15,71 +16,77 @@ startTimer();
 
 function saveElapsed() {
     let new_url;
-    browser.tabs.query({
-        active: true,
-        currentWindow: true
+    chrome.tabs.query({
+         active: true,
+         currentWindow: true
     }).then(tabs => {
         new_url = tabs[0].url;
-
-        if (priorUrl !== new_url) {
+        let localPrior = currentTab;
+        
+        if (typeof localPrior !== "undefined" && localPrior !== new_url ) {
             contentToStore[`ElapsedTime${currentTab}`] = elapsedTime;
-            browser.storage.local.set(contentToStore);
+            chrome.storage.local.set(contentToStore);
             let priorElapsedTime = elapsedTime;
             stopStopwatch();
             resetStopwatch();
             
             
             elapsedTime= 0;
-            browser.storage.local.get(`ElapsedTime${new_url}`).then((storedInfo) => {
+            chrome.storage.local.get(`ElapsedTime${new_url}`).then((storedInfo) => {
                 
                 elapsedPreviousTime = storedInfo[Object.keys(storedInfo)[0]];
-                if(typeof elapsedPreviousTime === "undefined"){
+                if(typeof elapsedPreviousTime === "undefined")
+                {
                     elapsedPreviousTime=0;
                 }
-               
-                
-                
-                
-                let lastPathArray = priorUrl.split('/');
-                let lastHost = lastPathArray[2];
-               
-                priorUrl = currentTab;
-                
-                currentTab = new_url;
-                //Retrieve elapsed time spent on website based on existing keys
-                let pathArray = currentTab.split('/');
-                
-                let protocol = pathArray[0];
-                let host = pathArray[2];
-                let url = protocol + '//' + host;
-                
-                
-                total = 0;
-                
-
-                browser.storage.local.get().then((storedInfo) => {
-                    Object.keys(storedInfo).forEach((key) => {
-                        if (key.startsWith(`ElapsedTime${url}`) && key !== `ElapsedTime${currentTab}`) {
-                            total += storedInfo[key];
-                        }
-                    });
-                startTime = new Date().getTime() - elapsedPreviousTime;
-                startTimer();
-
-                });
             });
+            let lastPathArray = localPrior.split('/');
+            let lastHost = lastPathArray[2];
+           
+            //priorUrl = new_url;
+            
+            currentTab = new_url;
+            //Retrieve elapsed time spent on website based on existing keys
+            let pathArray = currentTab.split('/');
+            
+            let protocol = pathArray[0];
+            let host = pathArray[2];
+            let url = protocol + '//' + host;
+            
+            
+            //total = 0;
+            let tempTotal = 0;
+
+            chrome.storage.local.get().then((storedInfo) => {
+                Object.keys(storedInfo).forEach((key) => {
+                    if (key.startsWith(`ElapsedTime${url}`) && key !== `ElapsedTime${currentTab}`) {
+                        tempTotal += storedInfo[key];
+                    }
+                });
+            total = tempTotal;
+            startTime = new Date().getTime() - elapsedPreviousTime;
+            startTimer();
+
+            });
+            
         }
     });
 }
 
 function startTimer() {
     
-    //saveElapsed();
-     browser.tabs.query({
+    //User has navigated to a new or previously visited site. Update prior Url of active window and start timer.
+     try {
+     chrome.tabs.query({
          currentWindow: true , active: true
      }).then((tabs) => {
-         priorUrl = tabs[0].url;
+         currentTab = tabs[0].url;
      });
+     } catch (error) {
+        
+        console.log(error);
+     }
+     
     currentTime = new Date().getTime();
     startTime = currentTime;
     if(typeof elapsedPreviousTime === "undefined") {
@@ -132,10 +139,19 @@ function updateStopwatch() {
         elapsedPreviousTime=0
     }
     elapsedTime = currentTime - (startTime);
-    window.elapsedTime = elapsedTime;
-
-    browser.runtime.sendMessage({"elapsedTime": elapsedTime, "total":total+elapsedTime});
-
+    //window.elapsedTime = elapsedTime;
+    try {
+        if(typeof sendReceive !== "undefined" && sendReceive==true) {
+        
+            chrome.runtime.sendMessage({"elapsedTime": elapsedTime, "total":total+elapsedTime});
+        } 
+    }
+        
+    catch (error) {
+        console.log(error);
+        sendReceive = false;
+    }
+    
 }
 
 function pad(number) {
@@ -143,16 +159,19 @@ function pad(number) {
     return (number < 10 ? "0" : "") + number;
 }
 
-        
-browser.tabs.onActivated.addListener(saveElapsed);
-browser.tabs.onUpdated.addListener(saveElapsed);
-try {
-    browser.tabs.onActiveChanged.addListener(saveElapsed);
-    } catch (error) {
-        console.error(error);
-    }
 
-browser.tabs.onRemoved.addListener(saveElapsed);
+
+        
+chrome.tabs.onActivated.addListener(saveElapsed);
+chrome.tabs.onUpdated.addListener(saveElapsed);
+chrome.tabs.onRemoved.addListener(saveElapsed);
+
+chrome.runtime.onMessage.addListener((data, sender) => {
+    //Listen for message from background script
+    if(data.sendReceive == true) {
+        sendReceive = data.sendReceive;
+    }
+});
 
 
 
