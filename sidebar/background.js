@@ -36,11 +36,14 @@ class Mutex {
   }
 }
 
-const mutex = new Mutex();
-startTimer();
+const mutex_save_elapsed = new Mutex();
 
+
+if (browser.runtime.onMessage !=null){
+    startTimer();
+}
 async function saveElapsed() {
-    await mutex.lock();
+    await mutex_save_elapsed.lock();
     try {
         let new_url;
         browser.tabs.query({
@@ -48,8 +51,8 @@ async function saveElapsed() {
             currentWindow: true
         }).then(tabs => {
             new_url = tabs[0].url;
-
-            if (priorUrl !== new_url) {
+            
+            if (priorUrl !== new_url && new_url !== "") {
                 contentToStore[`ElapsedTime${currentTab}`] = elapsedTime;
                 browser.storage.local.set(contentToStore);
                 let priorElapsedTime = elapsedTime;
@@ -58,6 +61,7 @@ async function saveElapsed() {
                 
                 
                 elapsedTime= 0;
+                
                 browser.storage.local.get(`ElapsedTime${new_url}`).then((storedInfo) => {
                     
                     elapsedPreviousTime = storedInfo[Object.keys(storedInfo)[0]];
@@ -99,39 +103,51 @@ async function saveElapsed() {
             }
         });
     } finally {
-        mutex.unlock();
+        mutex_save_elapsed.unlock();
     }
 }
 
-function startTimer() {
-    
-    //saveElapsed();
-     browser.tabs.query({
-         currentWindow: true , active: true
-     }).then((tabs) => {
-         priorUrl = tabs[0].url;
-     });
-    currentTime = new Date().getTime();
-    startTime = currentTime;
-    if(typeof elapsedPreviousTime === "undefined") {
+
+
+async function startTimer() {
+    await mutex_save_elapsed.lock();
+    try {
+        //saveElapsed();
+         browser.tabs.query({
+             currentWindow: true , active: true
+         }).then((tabs) => {
+             priorUrl = tabs[0].url;
+         });
+        currentTime = new Date().getTime();
+        startTime = currentTime;
+        if(typeof elapsedPreviousTime === "undefined") {
+            
+            elapsedPreviousTime = 0;
+            
+        }
+        elapsedPausedTime = 0;
         
-        elapsedPreviousTime = 0;
         
+        if (!stopwatchInterval) {
+            startTime = new Date().getTime() - (elapsedPreviousTime + elapsedPausedTime); // get the starting time by subtracting the elapsed paused time from the current time
+            stopwatchInterval = setInterval(updateStopwatch, 100); // update every second
+        }
     }
-    elapsedPausedTime = 0;
-    
-    
-    if (!stopwatchInterval) {
-        startTime = new Date().getTime() - (elapsedPreviousTime + elapsedPausedTime); // get the starting time by subtracting the elapsed paused time from the current time
-        stopwatchInterval = setInterval(updateStopwatch, 100); // update every second
+    finally {
+        mutex_save_elapsed.unlock();
     }
     
 }
 
-function stopStopwatch() {
+async function stopStopwatch() {
+    await mutex_save_elapsed.lock();
+    try {
     clearInterval(stopwatchInterval); // stop the interval
     elapsedPausedTime = new Date().getTime() - startTime; // calculate elapsed paused time
     stopwatchInterval = null; // reset the interval variable
+    } finally {
+        mutex_save_elapsed.unlock();
+    }
 }
 
 
@@ -155,10 +171,10 @@ function resetStopwatch() {
 
     //document.getElementById("stopwatch").innerText = formatElapsed(elapsedTime); // reset the display
 }
-const update_stopwatch_mutex = new Mutex()
+
 
 async function updateStopwatch() {
-    await update_stopwatch_mutex.lock();
+    await mutex_save_elapsed.lock();
     try {
     //milliseconds
     currentTime = new Date().getTime(); // get current time in milliseconds
@@ -167,13 +183,14 @@ async function updateStopwatch() {
     }
     elapsedTime = currentTime - (startTime);
     window.elapsedTime = elapsedTime;
-    
-    browser.runtime.sendMessage({"elapsedTime": elapsedTime, "total":total+elapsedTime});
+    if (browser.runtime.onMessage !=null) {
+        browser.runtime.sendMessage({"elapsedTime": elapsedTime, "total":total+elapsedTime});
+    }
     }catch (error) {
         // On a browser window without onActiveChanged i.e not a 'tab'
     }
      finally {
-        update_stopwatch_mutex.unlock();
+        mutex_save_elapsed.unlock();
     }
 
 }
@@ -186,12 +203,10 @@ function pad(number) {
         
 browser.tabs.onActivated.addListener(saveElapsed);
 browser.tabs.onUpdated.addListener(saveElapsed);
-try {
-    browser.tabs.onActiveChanged.addListener(saveElapsed);
-    } catch (error) {
-        // On a browser window without onActiveChanged i.e not a 'tab'
-        
-    }
+
+if (browser.tabs.onActiveChanged != null) {
+browser.tabs.onActiveChanged.addListener(saveElapsed);
+}
 
 browser.tabs.onRemoved.addListener(saveElapsed);
 
