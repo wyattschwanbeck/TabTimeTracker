@@ -9,6 +9,24 @@ body {
   font-family: "Lucida Console", "Courier New", monospace;
   
 }
+button {
+  background-color: black;
+  font-family: "Lucida Console", "Courier New", monospace;
+  color: white;
+  text-align: center;
+  margin:0;
+  background-color: black;
+  font-family: "Lucida Console", "Courier New", monospace;
+  /* border: 1px; */
+}
+
+.content {
+  padding: 0 18px;
+  display: none;
+  overflow: hidden;
+  background-color: black;
+}
+
 
 h1 {
   background-color: black;
@@ -27,4 +45,9 @@ div {
     /* width: fit-content; */
   /* height:fit-content; */
   text-align: center;
+}
+
+p {
+    font-size: 13px;
+    text-align: center;
 }

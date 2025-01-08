@@ -1,4 +1,4 @@
-
+import Mutex from "mutex.js"
     let showButton = document.getElementById("showBtn");
     let hideBtn = document.getElementById("hideBtn");
     hideBtn.onclick =closeNav;

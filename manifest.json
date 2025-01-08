@@ -2,8 +2,8 @@
 
   "manifest_version": 2,
   "name": "TrackPageTime",
-  "description": "Displays a sidebar with a stop-watch for how long you've been in a tab. All time tracking is local to the web browser and your information is private!",
-  "version": "2.1",
+  "description": "Displays a sidebar with a stop-watch for how long you've been in a website and the specific url. All time tracking is local to the web browser and your information is private!",
+  "version": "2.4",
   
    "browser_action": {
     "default_icon": "icons/hourglass-lite2.png",
